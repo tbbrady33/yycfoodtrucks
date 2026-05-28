@@ -71,7 +71,7 @@ revoke execute on function private.compute_open_transitions() from public;
 ----------------------------------------------------------------------
 -- pg_cron schedule — wrapped so missing extension doesn't kill the migration
 ----------------------------------------------------------------------
-do $$
+do $do$
 begin
   if exists (select 1 from pg_extension where extname = 'pg_cron') then
     -- Idempotent: unschedule any previous version with the same name first.
@@ -84,6 +84,6 @@ begin
       $cron$select private.compute_open_transitions()$cron$
     );
   else
-    raise notice 'pg_cron is not enabled; skipping cron schedule. Enable in dashboard, then run: select cron.schedule(''compute-open-transitions'', ''* * * * *'', $$select private.compute_open_transitions()$$);';
+    raise notice 'pg_cron is not enabled; skipping the compute-open-transitions schedule. Enable the extension in the Supabase dashboard, then schedule it manually with cron.schedule.';
   end if;
-end $$;
+end $do$;
