@@ -11,6 +11,7 @@ import {
   useSetManualOverride,
   type OperatorTruck,
 } from '@/lib/queries/operator-trucks';
+import { useUnreadMessageCount } from '@/lib/queries/operator-messages';
 import { supabase } from '@/lib/supabase';
 
 /**
@@ -207,13 +208,13 @@ function OperatorView({ isAdmin }: { isAdmin: boolean }) {
       )}
 
       {/*
-        Operators only see the public-facing "Browse trucks" link here.
-        The /contact form is customer-to-management; surfacing it to
-        operators conflates roles. Favorites + inbox are deliberately
-        omitted too — operators talk to admin out-of-band, not via the
-        customer contact pipeline.
+        Operators see "Messages" (admin → operator inbox) and the
+        public-facing "Browse trucks" link. The /contact form is
+        customer-to-management; surfacing it to operators conflates roles.
+        Favorites + customer inbox are deliberately omitted too.
       */}
       <View className="mt-2 flex-row flex-wrap gap-3">
+        <MessagesTile />
         <NavTile href="/trucks" label="Browse trucks" />
       </View>
     </View>
@@ -292,6 +293,24 @@ function NavButton({ href, label }: { href: string; label: string }) {
     <Link href={href as never} asChild>
       <Pressable className="flex-1 items-center justify-center rounded-lg bg-neutral-900 px-4 py-2.5">
         <Text className="text-sm font-semibold text-white">{label}</Text>
+      </Pressable>
+    </Link>
+  );
+}
+
+function MessagesTile() {
+  const unread = useUnreadMessageCount().data ?? 0;
+  return (
+    <Link href="/operator-messages" asChild>
+      <Pressable className="flex-1 flex-row items-center justify-center gap-2 rounded-lg border border-neutral-200 dark:border-neutral-800 px-3 py-3">
+        <Text className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+          Messages
+        </Text>
+        {unread > 0 ? (
+          <View className="rounded-full bg-blue-600 px-2 py-0.5">
+            <Text className="text-[10px] font-semibold text-white">{unread}</Text>
+          </View>
+        ) : null}
       </Pressable>
     </Link>
   );

@@ -5,6 +5,7 @@ import { Stack } from 'expo-router';
 import { useRequireAdmin } from '@/lib/auth-gates';
 import { useAllOperators, useInviteOperator, type InviteOperatorResult } from '@/lib/queries/admin';
 import { useCategories } from '@/lib/queries/categories';
+import { useSendOperatorMessage } from '@/lib/queries/operator-messages';
 
 export default function Operators() {
   const gate = useRequireAdmin();
@@ -147,23 +148,97 @@ export default function Operators() {
             No operators yet.
           </Text>
         ) : (
-          (operators.data ?? []).map((op) => (
-            <View
-              key={op.id}
-              className="rounded-xl border border-neutral-200 dark:border-neutral-800 p-3"
-            >
-              <Text className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
-                {op.display_name ?? op.id}
-              </Text>
-              <Text className="text-xs text-neutral-500 dark:text-neutral-400">
-                Joined {new Date(op.created_at).toLocaleDateString()}
-                {op.must_change_password ? ' · awaiting first sign-in' : ''}
-              </Text>
-            </View>
-          ))
+          (operators.data ?? []).map((op) => <OperatorRow key={op.id} operator={op} />)
         )}
       </View>
     </ScrollView>
+  );
+}
+
+function OperatorRow({
+  operator,
+}: {
+  operator: { id: string; display_name: string | null; must_change_password: boolean; created_at: string };
+}) {
+  const [composing, setComposing] = useState(false);
+  const [subject, setSubject] = useState('');
+  const [body, setBody] = useState('');
+  const send = useSendOperatorMessage();
+
+  const onSend = async () => {
+    if (!body.trim()) {
+      Alert.alert('Message body required');
+      return;
+    }
+    try {
+      await send.mutateAsync({
+        recipientId: operator.id,
+        subject: subject.trim() || null,
+        body: body.trim(),
+      });
+      setSubject('');
+      setBody('');
+      setComposing(false);
+      Alert.alert('Sent');
+    } catch (e) {
+      Alert.alert('Send failed', String(e));
+    }
+  };
+
+  return (
+    <View className="rounded-xl border border-neutral-200 dark:border-neutral-800 p-3">
+      <View className="flex-row items-baseline justify-between gap-2">
+        <View className="flex-1">
+          <Text className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+            {operator.display_name ?? operator.id}
+          </Text>
+          <Text className="text-xs text-neutral-500 dark:text-neutral-400">
+            Joined {new Date(operator.created_at).toLocaleDateString()}
+            {operator.must_change_password ? ' · awaiting first sign-in' : ''}
+          </Text>
+        </View>
+        <Pressable onPress={() => setComposing((v) => !v)}>
+          <Text className="text-sm font-medium text-blue-600 dark:text-blue-400">
+            {composing ? 'Cancel' : 'Message'}
+          </Text>
+        </Pressable>
+      </View>
+
+      {composing ? (
+        <View className="mt-3 gap-2 border-t border-neutral-100 dark:border-neutral-900 pt-3">
+          <TextInput
+            value={subject}
+            onChangeText={setSubject}
+            placeholder="Subject (optional)"
+            placeholderTextColor="#9ca3af"
+            className="rounded-lg border border-neutral-300 dark:border-neutral-700 px-3 py-2 text-sm text-neutral-900 dark:text-neutral-100"
+          />
+          <TextInput
+            value={body}
+            onChangeText={setBody}
+            placeholder="Message…"
+            placeholderTextColor="#9ca3af"
+            multiline
+            numberOfLines={4}
+            textAlignVertical="top"
+            className="min-h-[80px] rounded-lg border border-neutral-300 dark:border-neutral-700 px-3 py-2 text-sm text-neutral-900 dark:text-neutral-100"
+          />
+          <Pressable
+            onPress={onSend}
+            disabled={send.isPending}
+            className={`items-center justify-center rounded-lg bg-neutral-900 px-3 py-2 ${
+              send.isPending ? 'opacity-60' : ''
+            }`}
+          >
+            {send.isPending ? (
+              <ActivityIndicator color="white" />
+            ) : (
+              <Text className="text-sm font-semibold text-white">Send</Text>
+            )}
+          </Pressable>
+        </View>
+      ) : null}
+    </View>
   );
 }
 
