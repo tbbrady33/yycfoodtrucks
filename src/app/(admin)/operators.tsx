@@ -6,6 +6,7 @@ import { useRequireAdmin } from '@/lib/auth-gates';
 import { useAllOperators, useInviteOperator, type InviteOperatorResult } from '@/lib/queries/admin';
 import { useCategories } from '@/lib/queries/categories';
 import { useSendOperatorMessage } from '@/lib/queries/operator-messages';
+import { errorMessage } from '@/lib/error-message';
 
 export default function Operators() {
   const gate = useRequireAdmin();
@@ -39,7 +40,7 @@ export default function Operators() {
       setTruckName('');
       setCategoryId(null);
     } catch (e) {
-      Alert.alert('Invite failed', String(e));
+      Alert.alert('Invite failed', errorMessage(e));
     }
   };
 
@@ -163,11 +164,14 @@ function OperatorRow({
   const [composing, setComposing] = useState(false);
   const [subject, setSubject] = useState('');
   const [body, setBody] = useState('');
+  const [sentNote, setSentNote] = useState<{ ok: boolean; msg: string } | null>(null);
   const send = useSendOperatorMessage();
+  const isPending = operator.must_change_password;
 
   const onSend = async () => {
+    setSentNote(null);
     if (!body.trim()) {
-      Alert.alert('Message body required');
+      setSentNote({ ok: false, msg: 'Body is required.' });
       return;
     }
     try {
@@ -178,10 +182,16 @@ function OperatorRow({
       });
       setSubject('');
       setBody('');
-      setComposing(false);
-      Alert.alert('Sent');
+      // Keep the composing panel open so the success note is visible.
+      // The admin can collapse it manually with Cancel.
+      setSentNote({
+        ok: true,
+        msg: isPending
+          ? 'Sent. The operator will see this once they sign in.'
+          : 'Sent.',
+      });
     } catch (e) {
-      Alert.alert('Send failed', String(e));
+      setSentNote({ ok: false, msg: errorMessage(e) });
     }
   };
 
@@ -189,15 +199,28 @@ function OperatorRow({
     <View className="rounded-xl border border-neutral-200 dark:border-neutral-800 p-3">
       <View className="flex-row items-baseline justify-between gap-2">
         <View className="flex-1">
-          <Text className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
-            {operator.display_name ?? operator.id}
-          </Text>
+          <View className="flex-row items-baseline gap-2">
+            <Text className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+              {operator.display_name ?? operator.id}
+            </Text>
+            {isPending ? (
+              <View className="rounded-full bg-amber-100 dark:bg-amber-900/40 px-2 py-0.5">
+                <Text className="text-[10px] font-semibold text-amber-700 dark:text-amber-300">
+                  Pending invite
+                </Text>
+              </View>
+            ) : null}
+          </View>
           <Text className="text-xs text-neutral-500 dark:text-neutral-400">
             Joined {new Date(operator.created_at).toLocaleDateString()}
-            {operator.must_change_password ? ' · awaiting first sign-in' : ''}
           </Text>
         </View>
-        <Pressable onPress={() => setComposing((v) => !v)}>
+        <Pressable
+          onPress={() => {
+            setComposing((v) => !v);
+            setSentNote(null);
+          }}
+        >
           <Text className="text-sm font-medium text-blue-600 dark:text-blue-400">
             {composing ? 'Cancel' : 'Message'}
           </Text>
@@ -206,6 +229,12 @@ function OperatorRow({
 
       {composing ? (
         <View className="mt-3 gap-2 border-t border-neutral-100 dark:border-neutral-900 pt-3">
+          {isPending ? (
+            <Text className="text-xs text-amber-700 dark:text-amber-300">
+              This operator hasn't signed in yet. The message will be stored
+              and shown the first time they open the app.
+            </Text>
+          ) : null}
           <TextInput
             value={subject}
             onChangeText={setSubject}
@@ -236,6 +265,18 @@ function OperatorRow({
               <Text className="text-sm font-semibold text-white">Send</Text>
             )}
           </Pressable>
+          {sentNote ? (
+            <Text
+              className={`text-xs font-medium ${
+                sentNote.ok
+                  ? 'text-green-700 dark:text-green-400'
+                  : 'text-red-600 dark:text-red-400'
+              }`}
+            >
+              {sentNote.ok ? '✓ ' : '✗ '}
+              {sentNote.msg}
+            </Text>
+          ) : null}
         </View>
       ) : null}
     </View>

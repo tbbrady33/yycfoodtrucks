@@ -10,6 +10,7 @@ import {
   useSendOperatorMessage,
   type OperatorMessage,
 } from '@/lib/queries/operator-messages';
+import { errorMessage } from '@/lib/error-message';
 
 /**
  * Messages thread for the signed-in user (operator or admin).
@@ -143,7 +144,7 @@ function ReplyForm({
       setBody('');
       onDone();
     } catch (e) {
-      Alert.alert('Send failed', String(e));
+      Alert.alert('Send failed', errorMessage(e));
     }
   };
 
