@@ -75,10 +75,9 @@ do $$
 begin
   if exists (select 1 from pg_extension where extname = 'pg_cron') then
     -- Idempotent: unschedule any previous version with the same name first.
-    perform cron.unschedule('compute-open-transitions')
-    where exists (
-      select 1 from cron.job where jobname = 'compute-open-transitions'
-    );
+    if exists (select 1 from cron.job where jobname = 'compute-open-transitions') then
+      perform cron.unschedule('compute-open-transitions');
+    end if;
     perform cron.schedule(
       'compute-open-transitions',
       '* * * * *',
