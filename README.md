@@ -1,56 +1,56 @@
-# Welcome to your Expo app 👋
+# YYC Street Food
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A native mobile directory + live-status tracker for Calgary street food trucks.
+
+> Phase 1 in progress. Approved plan: `~/.claude/plans/project-yyc-street-federated-lobster.md`
+
+## Stack
+
+- **Expo SDK 56** + TypeScript + Expo Router
+- **NativeWind v4 + Tailwind v3** for styling
+- **gluestack-ui v3** for component primitives (scaffolded into `src/components/ui/`)
+- **Supabase** (Postgres + Auth + Storage + RLS + Edge Functions) for backend
+- **TanStack Query** + **supabase-js** for data
+- **React Hook Form + Zod** for forms
+- **expo-secure-store** for session, **expo-notifications** for push
+- **EAS** Build / Submit / Update for shipping
 
 ## Get started
 
-1. Install dependencies
-
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
 ```bash
-npm run reset-project
+npm install
+npm run ios      # iOS simulator (needs Xcode + a simulator runtime installed)
+# or
+npm run start    # Metro only; scan QR with Expo Go on a physical device
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+For push notifications you'll need a custom dev client — `npm run ios` with Expo Go won't deliver pushes. That's Step 9 of the plan; for browse / auth / forms during Steps 1–8 the simulator is fine.
 
-### Other setup steps
+## Project layout
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+```
+app.json                       Expo config; bundle id com.tbbrady33.yycfoodtruck
+eas.json                       EAS Build profiles (development, preview, production)
+src/
+  app/                         Expo Router screens (file-based routing)
+  components/                  Themed components + UI primitives
+    ui/gluestack-ui-provider/  gluestack v3 provider (scaffolded by `gluestack-ui init`)
+  constants/theme.ts           Color tokens (light/dark)
+  hooks/                       useColorScheme, useTheme
+  global.css                   Tailwind entry; consumed by Metro via metro.config.js
+supabase/                      (Step 2) migrations, Edge Functions, RLS tests
+```
 
-## Learn more
+## EAS
 
-To learn more about developing your project with Expo, look at the following resources:
+```bash
+eas build -p ios --profile development   # dev client (Step 9)
+eas build -p ios --profile production    # release build
+eas submit -p ios                        # App Store upload
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+EAS projectId: `5ded073b-6fc1-4d02-badf-9e390affba8d` (`@tbbrady33/yyc-foodtruck`).
 
-## Join the community
+## License
 
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+See [LICENSE](./LICENSE).
