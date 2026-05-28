@@ -13,7 +13,7 @@ export default function CategoryListing() {
   return (
     <View className="flex-1 bg-white dark:bg-black">
       <Stack.Screen
-        options={{ title: category.data?.name ?? 'Category' }}
+        options={{ headerShown: true, title: category.data?.name ?? 'Category' }}
       />
 
       {category.isLoading || trucks.isLoading ? (

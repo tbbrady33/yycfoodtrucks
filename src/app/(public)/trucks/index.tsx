@@ -12,7 +12,7 @@ export default function TrucksList() {
 
   return (
     <View className="flex-1 bg-white dark:bg-black">
-      <Stack.Screen options={{ title: 'All trucks' }} />
+      <Stack.Screen options={{ headerShown: true, title: 'All trucks' }} />
 
       <View className="border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 gap-3">
         <TextInput

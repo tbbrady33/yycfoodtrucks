@@ -14,6 +14,7 @@ import { supabase } from '@/lib/supabase';
  *   - Header with "YYC Street Food" + sign in / sign out
  *   - "Browse by category" 2-column grid of the 6 categories
  *   - "All trucks" CTA to the full searchable list
+ *   - Quick nav row to Favorites / Inbox / Contact
  */
 export default function Landing() {
   const { loading: sessionLoading, user } = useSession();
@@ -98,6 +99,16 @@ export default function Landing() {
             </Pressable>
           </Link>
         </View>
+
+        <View className="px-6 pt-6 flex-row gap-3">
+          {user ? (
+            <>
+              <NavTile href="/favorites" label="Favorites" />
+              <NavTile href="/inbox" label="Inbox" />
+            </>
+          ) : null}
+          <NavTile href="/contact" label="Contact us" />
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -109,6 +120,18 @@ function CategoryTile({ category }: { category: Category }) {
       <Pressable className="flex-1 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 p-4 min-h-[88px] justify-end">
         <Text className="text-base font-semibold text-neutral-900 dark:text-neutral-100">
           {category.name}
+        </Text>
+      </Pressable>
+    </Link>
+  );
+}
+
+function NavTile({ href, label }: { href: string; label: string }) {
+  return (
+    <Link href={href as never} asChild>
+      <Pressable className="flex-1 items-center justify-center rounded-lg border border-neutral-200 dark:border-neutral-800 px-3 py-3">
+        <Text className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+          {label}
         </Text>
       </Pressable>
     </Link>
