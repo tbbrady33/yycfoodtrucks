@@ -72,6 +72,7 @@ function TruckCard({ truck }: { truck: OperatorTruck }) {
       <View className="mt-3 flex-row gap-2">
         <NavButton href={`/trucks/${truck.id}/edit`} label="Edit basics" />
         <NavButton href={`/trucks/${truck.id}/menu`} label="Menu" />
+        <NavButton href={`/trucks/${truck.id}/schedule`} label="Schedule" />
       </View>
 
       <View className="mt-5 rounded-lg border border-neutral-200 dark:border-neutral-800 p-3">

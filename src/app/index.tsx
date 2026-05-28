@@ -192,10 +192,15 @@ function OperatorView() {
         trucks.data!.map((t) => <OperatorTruckCard key={t.id} truck={t} />)
       )}
 
+      {/*
+        Operators only see the public-facing "Browse trucks" link here.
+        The /contact form is customer-to-management; surfacing it to
+        operators conflates roles. Favorites + inbox are deliberately
+        omitted too — operators talk to admin out-of-band, not via the
+        customer contact pipeline.
+      */}
       <View className="mt-2 flex-row flex-wrap gap-3">
         <NavTile href="/trucks" label="Browse trucks" />
-        <NavTile href="/inbox" label="Inbox" />
-        <NavTile href="/contact" label="Contact us" />
       </View>
     </View>
   );
@@ -224,6 +229,7 @@ function OperatorTruckCard({ truck }: { truck: OperatorTruck }) {
       <View className="mt-3 flex-row gap-2">
         <NavButton href={`/trucks/${truck.id}/edit`} label="Edit" />
         <NavButton href={`/trucks/${truck.id}/menu`} label="Menu" />
+        <NavButton href={`/trucks/${truck.id}/schedule`} label="Schedule" />
       </View>
 
       <View className="mt-3 gap-2">
