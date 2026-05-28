@@ -3,7 +3,12 @@ import { ActivityIndicator, Alert, Pressable, ScrollView, Text, TextInput, View 
 import { Stack } from 'expo-router';
 
 import { useRequireAdmin } from '@/lib/auth-gates';
-import { useAllOperators, useInviteOperator, type InviteOperatorResult } from '@/lib/queries/admin';
+import {
+  useAllOperators,
+  useDeleteOperator,
+  useInviteOperator,
+  type InviteOperatorResult,
+} from '@/lib/queries/admin';
 import { useCategories } from '@/lib/queries/categories';
 import { useSendOperatorMessage } from '@/lib/queries/operator-messages';
 import { errorMessage } from '@/lib/error-message';
@@ -166,7 +171,29 @@ function OperatorRow({
   const [body, setBody] = useState('');
   const [sentNote, setSentNote] = useState<{ ok: boolean; msg: string } | null>(null);
   const send = useSendOperatorMessage();
+  const del = useDeleteOperator();
   const isPending = operator.must_change_password;
+
+  const onDelete = () => {
+    Alert.alert(
+      'Remove this operator?',
+      `${operator.display_name ?? operator.id} will lose access immediately. Their reviews, follows, and messages are deleted; trucks they owned become unowned (you can reassign them).`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Remove',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await del.mutateAsync(operator.id);
+            } catch (e) {
+              Alert.alert('Remove failed', errorMessage(e));
+            }
+          },
+        },
+      ]
+    );
+  };
 
   const onSend = async () => {
     setSentNote(null);
@@ -215,16 +242,27 @@ function OperatorRow({
             Joined {new Date(operator.created_at).toLocaleDateString()}
           </Text>
         </View>
-        <Pressable
-          onPress={() => {
-            setComposing((v) => !v);
-            setSentNote(null);
-          }}
-        >
-          <Text className="text-sm font-medium text-blue-600 dark:text-blue-400">
-            {composing ? 'Cancel' : 'Message'}
-          </Text>
-        </Pressable>
+        <View className="flex-row gap-3">
+          <Pressable
+            onPress={() => {
+              setComposing((v) => !v);
+              setSentNote(null);
+            }}
+          >
+            <Text className="text-sm font-medium text-blue-600 dark:text-blue-400">
+              {composing ? 'Cancel' : 'Message'}
+            </Text>
+          </Pressable>
+          <Pressable onPress={onDelete} disabled={del.isPending}>
+            <Text
+              className={`text-sm font-medium text-red-600 dark:text-red-400 ${
+                del.isPending ? 'opacity-60' : ''
+              }`}
+            >
+              Remove
+            </Text>
+          </Pressable>
+        </View>
       </View>
 
       {composing ? (
@@ -291,30 +329,24 @@ function InviteResultCard({
   onDismiss: () => void;
 }) {
   return (
-    <View className="rounded-xl border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950 p-3 gap-1">
-      <Text className="text-base font-semibold text-amber-900 dark:text-amber-200">
-        Invite sent — capture the password now
+    <View className="rounded-xl border border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-950 p-3 gap-1">
+      <Text className="text-base font-semibold text-green-900 dark:text-green-200">
+        Invite email sent
       </Text>
-      <Text className="text-xs text-amber-800 dark:text-amber-300">
-        This is shown ONCE. Copy it and share with the operator over a
-        secure channel.
-      </Text>
-      <Text className="mt-2 text-sm text-amber-900 dark:text-amber-200">
-        Email: {result.email}
-      </Text>
-      <Text className="text-sm font-mono text-amber-900 dark:text-amber-200" selectable>
-        Temp password: {result.temp_password}
+      <Text className="text-sm text-green-900 dark:text-green-200">
+        {result.email} will receive a link that signs them into the app
+        and routes them through Change Password to set their credentials.
       </Text>
       {result.warning ? (
-        <Text className="mt-2 text-xs text-amber-800 dark:text-amber-300">
+        <Text className="mt-2 text-xs text-amber-700 dark:text-amber-300">
           ⚠ {result.warning}
         </Text>
       ) : null}
       <Pressable
         onPress={onDismiss}
-        className="mt-3 items-center justify-center rounded-lg bg-amber-700 px-3 py-2"
+        className="mt-3 items-center justify-center rounded-lg bg-green-700 px-3 py-2"
       >
-        <Text className="text-sm font-semibold text-white">I've copied it</Text>
+        <Text className="text-sm font-semibold text-white">Dismiss</Text>
       </Pressable>
     </View>
   );

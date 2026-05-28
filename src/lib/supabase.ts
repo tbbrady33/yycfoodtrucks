@@ -34,6 +34,12 @@ export const supabase: SupabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY,
     persistSession: true,
     // RN apps never load via a redirect URL, so this saves a needless lookup.
     detectSessionInUrl: false,
+    // PKCE is the recommended flow for mobile auth callbacks (invite link,
+    // password reset). With pkce, the redirect URL carries ?code=... which
+    // we exchange for a session via exchangeCodeForSession in
+    // src/app/auth-callback.tsx — much friendlier than parsing hash
+    // fragments out of native deep links.
+    flowType: 'pkce',
   },
 });
 
