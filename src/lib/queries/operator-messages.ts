@@ -31,6 +31,27 @@ export function useReceivedMessages() {
   });
 }
 
+/**
+ * All messages the current user can see — both directions. RLS already
+ * scopes this to sender OR recipient = me (plus admin sees all).
+ */
+export function useMyMessages() {
+  const { user } = useSession();
+  return useQuery({
+    queryKey: ['operator-messages-thread', user?.id ?? null],
+    enabled: !!user,
+    queryFn: async (): Promise<OperatorMessage[]> => {
+      const { data, error } = await supabase
+        .from('operator_messages')
+        .select('id, sender_id, recipient_id, subject, body, created_at, read_at')
+        .or(`recipient_id.eq.${user!.id},sender_id.eq.${user!.id}`)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as OperatorMessage[];
+    },
+  });
+}
+
 /** Just the unread count — used for the landing badge. */
 export function useUnreadMessageCount() {
   const { user } = useSession();
@@ -50,8 +71,10 @@ export function useUnreadMessageCount() {
 }
 
 /**
- * Admin-only mutation. RLS rejects non-admins; the recipient-role guard
- * trigger rejects non-operator/admin recipients.
+ * Send a message. RLS allows admins and operators to insert (any
+ * other role gets rejected). The recipient-role trigger enforces the
+ * allowed sender→recipient pairs (admin↔admin, admin→operator,
+ * operator→admin).
  */
 export function useSendOperatorMessage() {
   const qc = useQueryClient();
@@ -73,6 +96,7 @@ export function useSendOperatorMessage() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['operator-messages-received'] });
+      qc.invalidateQueries({ queryKey: ['operator-messages-thread'] });
       qc.invalidateQueries({ queryKey: ['operator-messages-unread'] });
     },
   });
@@ -95,6 +119,7 @@ export function useMarkMessageRead() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['operator-messages-received'] });
+      qc.invalidateQueries({ queryKey: ['operator-messages-thread'] });
       qc.invalidateQueries({ queryKey: ['operator-messages-unread'] });
     },
   });
