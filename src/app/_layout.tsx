@@ -7,7 +7,7 @@ import { AnimatedSplashOverlay } from '@/components/animated-icon';
 import AppTabs from '@/components/app-tabs';
 import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
 
-import '@/src/global.css';
+import '@/global.css';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
