@@ -100,15 +100,16 @@ export function useModerateReview() {
 export type InviteOperatorResult = {
   user_id: string;
   email: string;
+  temp_password: string;
   truck_id: string | null;
   warning?: string;
 };
 
 /**
- * Calls admin-create-operator. The Edge Function emails the operator an
- * invite link (PKCE flow). On click, the app's /auth-callback exchanges
- * the code for a session and AuthRedirect sends them through
- * /change-password to set a password.
+ * Calls admin-create-operator. The Edge Function returns the generated
+ * temp password ONCE — admin captures it and shares with the operator
+ * out-of-band. Operator's must_change_password is set so their next
+ * sign-in routes through /change-password.
  */
 export function useInviteOperator() {
   const qc = useQueryClient();
