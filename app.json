@@ -11,7 +11,8 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.tbbrady33.yycfoodtruck",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSLocationWhenInUseUsageDescription": "Used to center the map on your location so you can see which trucks are nearby."
       }
     },
     "android": {
@@ -38,7 +39,14 @@
       "expo-image",
       "expo-splash-screen",
       "expo-web-browser",
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-maps",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Used to center the map on your location so you can see which trucks are nearby."
+        }
+      ]
     ]
   }
 }

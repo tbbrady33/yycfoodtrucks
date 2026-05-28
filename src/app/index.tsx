@@ -134,10 +134,17 @@ function CustomerView({ signedIn }: { signedIn: boolean }) {
         )}
       </View>
 
-      <View className="px-6 pt-6">
+      <View className="px-6 pt-6 flex-row gap-3">
         <Link href="/trucks" asChild>
-          <Pressable className="items-center justify-center rounded-lg bg-neutral-900 px-4 py-3">
+          <Pressable className="flex-1 items-center justify-center rounded-lg bg-neutral-900 px-4 py-3">
             <Text className="text-base font-semibold text-white">See all trucks</Text>
+          </Pressable>
+        </Link>
+        <Link href="/map" asChild>
+          <Pressable className="flex-1 items-center justify-center rounded-lg border border-neutral-300 dark:border-neutral-700 px-4 py-3">
+            <Text className="text-base font-semibold text-neutral-900 dark:text-neutral-100">
+              Map
+            </Text>
           </Pressable>
         </Link>
       </View>
@@ -216,6 +223,7 @@ function OperatorView({ isAdmin }: { isAdmin: boolean }) {
       <View className="mt-2 flex-row flex-wrap gap-3">
         <MessagesTile />
         <NavTile href="/trucks" label="Browse trucks" />
+        <NavTile href="/map" label="Map" />
       </View>
     </View>
   );
