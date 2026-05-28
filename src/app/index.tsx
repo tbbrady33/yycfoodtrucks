@@ -100,7 +100,7 @@ export default function Landing() {
           </Link>
         </View>
 
-        <View className="px-6 pt-6 flex-row gap-3">
+        <View className="px-6 pt-6 flex-row flex-wrap gap-3">
           {user ? (
             <>
               <NavTile href="/favorites" label="Favorites" />
@@ -108,6 +108,9 @@ export default function Landing() {
             </>
           ) : null}
           <NavTile href="/contact" label="Contact us" />
+          {profile?.role === 'operator' || profile?.role === 'admin' ? (
+            <NavTile href="/dashboard" label="Operator dashboard" />
+          ) : null}
         </View>
       </ScrollView>
     </SafeAreaView>
