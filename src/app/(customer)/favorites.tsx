@@ -3,9 +3,12 @@ import { Stack } from 'expo-router';
 
 import { TruckCard } from '@/components/truck-card';
 import { useFollows } from '@/lib/queries/follows';
+import { useRequireAuth } from '@/lib/auth-gates';
 
 export default function Favorites() {
+  const gate = useRequireAuth();
   const { data, isLoading, error } = useFollows();
+  if (gate) return gate;
 
   return (
     <View className="flex-1 bg-white dark:bg-black">

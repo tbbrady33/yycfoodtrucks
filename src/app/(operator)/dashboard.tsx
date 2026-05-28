@@ -7,6 +7,7 @@ import {
   useSetManualOverride,
   type OperatorTruck,
 } from '@/lib/queries/operator-trucks';
+import { useRequireOperator } from '@/lib/auth-gates';
 
 /**
  * Operator dashboard. Lists the trucks the signed-in user owns (RLS
@@ -17,7 +18,9 @@ import {
  * in Step 7.
  */
 export default function OperatorDashboard() {
+  const gate = useRequireOperator();
   const trucks = useMyOperatedTrucks();
+  if (gate) return gate;
 
   return (
     <ScrollView

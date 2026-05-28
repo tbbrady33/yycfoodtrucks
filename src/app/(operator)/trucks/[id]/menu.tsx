@@ -8,6 +8,7 @@ import {
   useDeleteMenuItem,
   useUpdateMenuItem,
 } from '@/lib/queries/operator-menu';
+import { useRequireOperator } from '@/lib/auth-gates';
 
 /**
  * Menu CRUD for an operator's truck.
@@ -19,8 +20,10 @@ import {
  * append-only and that's fine for v1.
  */
 export default function EditMenu() {
+  const gate = useRequireOperator();
   const { id: truckId } = useLocalSearchParams<{ id: string }>();
   const menu = useTruckMenu(truckId);
+  if (gate) return gate;
 
   return (
     <ScrollView

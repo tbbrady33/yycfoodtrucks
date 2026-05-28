@@ -7,12 +7,15 @@ import {
   useOperatorTruck,
   useUpdateTruckBasics,
 } from '@/lib/queries/operator-trucks';
+import { useRequireOperator } from '@/lib/auth-gates';
 
 export default function EditTruckBasics() {
+  const gate = useRequireOperator();
   const { id } = useLocalSearchParams<{ id: string }>();
   const truck = useOperatorTruck(id);
   const categories = useCategories();
   const update = useUpdateTruckBasics();
+  if (gate) return gate;
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');

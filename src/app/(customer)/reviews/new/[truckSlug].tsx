@@ -4,6 +4,7 @@ import { Stack, router, useLocalSearchParams } from 'expo-router';
 
 import { useTruckBySlug } from '@/lib/queries/trucks';
 import { useMyReview, useUpsertReview } from '@/lib/queries/reviews';
+import { useRequireAuth } from '@/lib/auth-gates';
 
 /**
  * Write/edit your review of a truck.
@@ -15,10 +16,12 @@ import { useMyReview, useUpsertReview } from '@/lib/queries/reviews';
  * - On success: back to the truck profile.
  */
 export default function WriteReview() {
+  const gate = useRequireAuth();
   const { truckSlug } = useLocalSearchParams<{ truckSlug: string }>();
   const truck = useTruckBySlug(truckSlug);
   const mine = useMyReview(truck.data?.id);
   const upsert = useUpsertReview();
+  if (gate) return gate;
 
   const [rating, setRating] = useState<number>(0);
   const [body, setBody] = useState<string>('');

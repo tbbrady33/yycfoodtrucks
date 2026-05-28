@@ -2,9 +2,12 @@ import { ActivityIndicator, FlatList, Text, View } from 'react-native';
 import { Stack } from 'expo-router';
 
 import { useMyContactRequests, type ContactRequest } from '@/lib/queries/contact';
+import { useRequireAuth } from '@/lib/auth-gates';
 
 export default function Inbox() {
+  const gate = useRequireAuth();
   const { data, isLoading, error } = useMyContactRequests();
+  if (gate) return gate;
 
   return (
     <View className="flex-1 bg-white dark:bg-black">
