@@ -36,3 +36,15 @@ export function useRequireOperator(): ReactElement | null {
   }
   return null;
 }
+
+export function useRequireAdmin(): ReactElement | null {
+  const { loading, session } = useSession();
+  const profile = useProfile();
+  if (loading) return null;
+  if (!session) return <Redirect href="/sign-in" />;
+  if (profile.isLoading) return null;
+  if (profile.data?.role !== 'admin') {
+    return <Redirect href="/" />;
+  }
+  return null;
+}

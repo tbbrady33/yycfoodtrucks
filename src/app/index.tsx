@@ -26,6 +26,7 @@ export default function Landing() {
   const role = profile?.role;
   const isOperator = role === 'operator' || role === 'admin';
 
+  const isAdmin = role === 'admin';
   return (
     <SafeAreaView className="flex-1 bg-white dark:bg-black" edges={['top']}>
       <ScrollView contentContainerStyle={{ paddingBottom: 32 }}>
@@ -35,7 +36,7 @@ export default function Landing() {
           role={role ?? null}
           isOperator={isOperator}
         />
-        {isOperator ? <OperatorView /> : <CustomerView signedIn={!!user} />}
+        {isOperator ? <OperatorView isAdmin={isAdmin} /> : <CustomerView signedIn={!!user} />}
       </ScrollView>
     </SafeAreaView>
   );
@@ -169,11 +170,24 @@ function CategoryTile({ category }: { category: Category }) {
 // Operator view
 // ---------------------------------------------------------------------------
 
-function OperatorView() {
+function OperatorView({ isAdmin }: { isAdmin: boolean }) {
   const trucks = useMyOperatedTrucks();
 
   return (
     <View className="px-6 pt-6 gap-4">
+      {isAdmin ? (
+        <View className="gap-3">
+          <Text className="text-xl font-semibold text-neutral-900 dark:text-neutral-100">
+            Admin
+          </Text>
+          <View className="flex-row flex-wrap gap-3">
+            <NavTile href="/operators" label="Operators" />
+            <NavTile href="/requests" label="Contact requests" />
+            <NavTile href="/reviews-flagged" label="Flagged reviews" />
+          </View>
+        </View>
+      ) : null}
+
       <Text className="text-xl font-semibold text-neutral-900 dark:text-neutral-100">
         Your trucks
       </Text>
